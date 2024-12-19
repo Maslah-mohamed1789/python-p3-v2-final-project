@@ -1,28 +1,26 @@
-votes = []
+from database.db_setup import execute_query
+from database.db_setup import fetch_all
 
 def create_vote(voter_id, candidate_id):
-    vote = {"voter_id": voter_id, "candidate_id": candidate_id}
-    votes.append(vote)
-    print(f"Voter {voter_id} voted for Candidate {candidate_id}.")
+    """Records a vote for a given voter and candidate."""
+    query = 'INSERT INTO votes (voter_id, candidate_id) VALUES (?, ?)'
+    execute_query(query, (voter_id, candidate_id))
+    print(f"Vote recorded for Voter {voter_id} on Candidate {candidate_id}.")
 
 def get_votes():
-    if not votes:
-        print("No votes cast yet.")
-    else:
-        print("\nVotes:")
-        for vote in votes:
-            print(f"Voter ID: {vote['voter_id']} voted for Candidate ID: {vote['candidate_id']}")
+    """Fetches all votes from the database."""
+    query = 'SELECT * FROM votes'
+    return fetch_all(query)
 
 def view_results():
-    if not votes:
-        print("No votes cast yet.")
-        return
-
-    results = {}
-    for vote in votes:
-        candidate_id = vote['candidate_id']
-        results[candidate_id] = results.get(candidate_id, 0) + 1
-
-    print("\nVoting Results:")
-    for candidate_id, count in results.items():
-        print(f"Candidate ID {candidate_id}: {count} votes")
+    """Displays the vote results by candidate."""
+    query = '''
+    SELECT candidates.name, COUNT(votes.id) AS vote_count
+    FROM votes
+    JOIN candidates ON votes.candidate_id = candidates.id
+    GROUP BY votes.candidate_id
+    ORDER BY vote_count DESC
+    '''
+    results = fetch_all(query)
+    for result in results:
+        print(f"{result[0]}: {result[1]} votes")

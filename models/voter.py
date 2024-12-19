@@ -1,12 +1,11 @@
-voters = []
-next_voter_id = 1
+from database.db_setup import execute_query
 
 def create_voter(name, age):
-    global next_voter_id
-    voter = {"id": next_voter_id, "name": name, "age": age}
-    voters.append(voter)
-    next_voter_id += 1
+    """Adds a new voter to the database."""
+    query = 'INSERT INTO voters (name, age) VALUES (?, ?)'
+    execute_query(query, (name, age))
     print(f"Voter {name} added.")
+
 
 def get_voters():
     if not voters:
